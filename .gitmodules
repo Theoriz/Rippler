@@ -1,0 +1,3 @@
+[submodule "Assets/Plugins/Augmenta"]
+	path = Assets/Plugins/Augmenta
+	url = https://github.com/augmenta-tech/augmentaunity
