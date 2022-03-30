@@ -15,7 +15,6 @@ public class RipplesComputeController : MonoBehaviour
 
     [Header("Compute Shader")]
     public ComputeShader ripplesCompute;
-    public int numThreadsPerGroup = 8;
 
     public Vector2Int textureSize = new Vector2Int(2048, 2048);
 
@@ -26,6 +25,11 @@ public class RipplesComputeController : MonoBehaviour
     public Vector2 ripplesSize = Vector2.one;
     public float ripplesScale = 5.0f;
     public float ripplesAttenuation = 0.01f;
+    [Space]
+    public Vector3 ripplesLightDirection = new Vector3(.2f, -.5f, .7f);
+    public float ripplesSpecular = 10.0f;
+    public float ripplesSpecularPower = 32.0f;
+    public float ripplesFrontSpecular = 10.0f;
 
     private RenderTexture _ripplesTexture0;
     private RenderTexture _ripplesTexture1;
@@ -44,6 +48,8 @@ public class RipplesComputeController : MonoBehaviour
 
     private float _updateTimer = 0;
 
+    private const int _NUMTHREADSPERGROUP = 8;
+
     private void OnEnable() {
 
         //Get kernel
@@ -60,13 +66,13 @@ public class RipplesComputeController : MonoBehaviour
 
         _augmentaPointsBuffer = new ComputeBuffer(_maxAugmentaPointsCount, sizeof(float) * 4);
         _augmentaPointsBuffer.SetData(_augmentaPoints);
+
+        ripplesMaterial.SetVector("_TextureSize", new Vector4(textureSize.x, textureSize.y, 0, 0));
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        GetMousePosition();
         UpdateAugmentaPositions();
 
         //Update the ripples at desired framerate
@@ -77,6 +83,7 @@ public class RipplesComputeController : MonoBehaviour
 		}
 
         BindRipplesTextureToMaterial();
+        UpdateRipplesMaterial();
     }
 
 	private void OnDisable() {
@@ -94,17 +101,6 @@ public class RipplesComputeController : MonoBehaviour
         _ripplesTexture1 = new RenderTexture(textureSize.x, textureSize.y, 1, RenderTextureFormat.ARGBFloat);
         _ripplesTexture1.enableRandomWrite = true;
         _ripplesTexture1.Create();
-    }
-
-    void GetMousePosition() {
-
-        //Raycast screen mouse position to the ripple floor object
-        _ray = cam.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(_ray, out _raycastHit, Mathf.Infinity, textureLayerMask)) {
-            ripplesCompute.SetVector("_Mouse", new Vector4(_raycastHit.textureCoord.x, _raycastHit.textureCoord.y, 0, 1));
-        } else {
-            ripplesCompute.SetVector("_Mouse", new Vector4(0, 0, 0, 0));
-        }
     }
 
     void UpdateAugmentaPositions() {
@@ -142,7 +138,7 @@ public class RipplesComputeController : MonoBehaviour
         ripplesCompute.SetTexture(_ripplesInitKernel, "_RipplesTextureRead", _readWriteFlag ? _ripplesTexture0 : _ripplesTexture1);
         ripplesCompute.SetTexture(_ripplesInitKernel, "_RipplesTextureWrite", _readWriteFlag ? _ripplesTexture1 : _ripplesTexture0);
 
-        ripplesCompute.Dispatch(_ripplesInitKernel, textureSize.x / numThreadsPerGroup, textureSize.y / numThreadsPerGroup, 1);
+        ripplesCompute.Dispatch(_ripplesInitKernel, textureSize.x / _NUMTHREADSPERGROUP, textureSize.y / _NUMTHREADSPERGROUP, 1);
     }
 
     void ComputeRipples() {
@@ -158,13 +154,20 @@ public class RipplesComputeController : MonoBehaviour
         ripplesCompute.SetTexture(_ripplesUpdateKernel, "_RipplesTextureRead", _readWriteFlag ? _ripplesTexture0 : _ripplesTexture1);
         ripplesCompute.SetTexture(_ripplesUpdateKernel, "_RipplesTextureWrite", _readWriteFlag ? _ripplesTexture1 : _ripplesTexture0);
 
-        ripplesCompute.Dispatch(_ripplesUpdateKernel, textureSize.x / numThreadsPerGroup, textureSize.y / numThreadsPerGroup, 1);
+        ripplesCompute.Dispatch(_ripplesUpdateKernel, textureSize.x / _NUMTHREADSPERGROUP, textureSize.y / _NUMTHREADSPERGROUP, 1);
     }
 
     void BindRipplesTextureToMaterial() {
 
         //Bind ripple texture to the ripple material
         ripplesMaterial.SetTexture("_RipplesTex", _readWriteFlag ? _ripplesTexture1 : _ripplesTexture0);
-        ripplesMaterial.SetVector("_TextureSize", new Vector4(textureSize.x, textureSize.y, 0, 0));
     }
+
+    void UpdateRipplesMaterial() {
+
+        ripplesMaterial.SetVector("_LightDirection", ripplesLightDirection);
+        ripplesMaterial.SetFloat("_Specular", ripplesSpecular);
+        ripplesMaterial.SetFloat("_SpecularPower", ripplesSpecularPower);
+        ripplesMaterial.SetFloat("_FrontSpecular", ripplesFrontSpecular);
+	}
 }

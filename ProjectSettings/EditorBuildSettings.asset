@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/3 - AugmentaVideoOutput/3 - AugmentaVideoOutput.unity
-    guid: 996181f8c30177f45988bec57f87d44b
+    path: Assets/Scenes/Main.unity
+    guid: 1cd82bba0ee3eed41bdd25dd42c35b66
   m_configObjects: {}

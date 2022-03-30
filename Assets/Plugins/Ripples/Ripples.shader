@@ -3,9 +3,10 @@ Shader "Unlit/Ripples"
 {
 	Properties
 	{
-		_ImageTex("Image Texture", 2D) = "white" {}
+		_BackgroundTex("Background Texture", 2D) = "white" {}
 		_RipplesTex("Ripples Texture", 2D) = "white" {}
-		_TextureSize("Texture Size", vector) = (2048, 2048, 0 , 0)
+		_TextureSize("Texture Size", vector) = (2048, 2048, 0, 0)
+		_LightDirection("Light Direction", vector) = (.2, -.5, .7, 0)
 		_Specular("Specular", float) = 10.0
 		_SpecularPower("Specular Power", float) = 32.0
 		_FrontSpecular("Front Specular", float) = 10
@@ -20,14 +21,15 @@ Shader "Unlit/Ripples"
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
-			sampler2D _ImageTex;
+			sampler2D _BackgroundTex;
 			sampler2D _RipplesTex;
 			float4 _TextureSize;
+			float4 _LightDirection;
 			float _Specular;
 			float _SpecularPower;
 			float _FrontSpecular;
 
-			float4 _ImageTex_ST;
+			float4 _BackgroundTex_ST;
 
 			struct appdata
 			{
@@ -48,7 +50,7 @@ Shader "Unlit/Ripples"
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _ImageTex);
+				o.uv = TRANSFORM_TEX(v.uv, _BackgroundTex);
 				o.screenPos = ComputeScreenPos(o.vertex);
 				UNITY_TRANSFER_FOG(o, o.vertex);
 				return o;
@@ -68,9 +70,9 @@ Shader "Unlit/Ripples"
 				// Totally fake displacement and shading:
 				float3 grad = normalize(float3(p21 - p01, p12 - p10, 1.));
 
-				float4 c = tex2D(_ImageTex, q + (grad.xy*.35));
+				float4 c = tex2D(_BackgroundTex, q + (grad.xy*.35));
 
-				float3 light = normalize(float3(.2, -.5, .7));
+				float3 light = normalize(_LightDirection.xyz);
 				//float diffuse = dot(grad,light);
 				float spec = pow(max(0.,-reflect(light,grad).z), _SpecularPower) * _Specular;
 
