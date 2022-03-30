@@ -19,6 +19,9 @@ public class AugmentaVideoOutputSizeBinder : MonoBehaviour
 
     void UpdateRipplesController() {
 
+        if (augmentaVideoOutput.videoOutputSizeInPixels.x <= 0 || augmentaVideoOutput.videoOutputSizeInPixels.y <= 0)
+            return;
+
         ripplesController.textureSize.x = Mathf.CeilToInt(augmentaVideoOutput.videoOutputSizeInPixels.x * ripplesTextureSizeMultiplier);
         ripplesController.textureSize.y = Mathf.CeilToInt(augmentaVideoOutput.videoOutputSizeInPixels.y * ripplesTextureSizeMultiplier);
     }
