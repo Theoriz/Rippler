@@ -21,7 +21,6 @@ public class RipplesComputeController : MonoBehaviour
     public Material ripplesMaterial;
 
     [Header("Ripples Parameters")]
-    public int updatePerSeconds = 60;
     public Vector2 ripplesSize = Vector2.one;
     public float ripplesScale = 5.0f;
     public float ripplesAttenuation = 0.01f;
@@ -46,18 +45,15 @@ public class RipplesComputeController : MonoBehaviour
     private ComputeBuffer _augmentaPointsBuffer;
     private int _maxAugmentaPointsCount = 20;
 
-    private float _updateTimer = 0;
-
     private const int _NUMTHREADSPERGROUP = 8;
+    private int _groupCountX;
+    private int _groupCountY;
 
     private void OnEnable() {
 
         //Get kernel
         _ripplesInitKernel = ripplesCompute.FindKernel("InitRipples");
         _ripplesUpdateKernel = ripplesCompute.FindKernel("UpdateRipples");
-
-        CreateRipplesTextures();
-        InitRipples();
 
         //Allocate buffers for maxAugmentaPointsCount
         _augmentaPoints = new Vector4[_maxAugmentaPointsCount];
@@ -67,20 +63,18 @@ public class RipplesComputeController : MonoBehaviour
         _augmentaPointsBuffer = new ComputeBuffer(_maxAugmentaPointsCount, sizeof(float) * 4);
         _augmentaPointsBuffer.SetData(_augmentaPoints);
 
-        ripplesMaterial.SetVector("_TextureSize", new Vector4(textureSize.x, textureSize.y, 0, 0));
+        UpdateTextureSize();
     }
 
     // Update is called once per frame
     void Update()
     {
+        //Check size
+        CheckTextureSize();
+
         UpdateAugmentaPositions();
 
-        //Update the ripples at desired framerate
-        _updateTimer += Time.deltaTime;
-        if(_updateTimer > 1.0f / updatePerSeconds) {
-            ComputeRipples();
-            _updateTimer = 0;
-		}
+        ComputeRipples();
 
         BindRipplesTextureToMaterial();
         UpdateRipplesMaterial();
@@ -89,12 +83,41 @@ public class RipplesComputeController : MonoBehaviour
 	private void OnDisable() {
 
         _augmentaPointsBuffer.Release();
+
+        if (_ripplesTexture0 != null)
+            _ripplesTexture0.Release();
+
+        if (_ripplesTexture1 != null)
+            _ripplesTexture1.Release();
+    }
+
+    void CheckTextureSize() {
+
+        if (_ripplesTexture0.width != textureSize.x || _ripplesTexture0.height != textureSize.y || _ripplesTexture1.width != textureSize.x || _ripplesTexture1.height != textureSize.y)
+            UpdateTextureSize();
+	}
+
+    void UpdateTextureSize() {
+
+        _groupCountX = Mathf.CeilToInt((float)textureSize.x / _NUMTHREADSPERGROUP);
+        _groupCountY = Mathf.CeilToInt((float)textureSize.y / _NUMTHREADSPERGROUP);
+
+        CreateRipplesTextures();
+        InitRipples();
+
+        ripplesMaterial.SetVector("_TextureSize", new Vector4(textureSize.x, textureSize.y, 0, 0));
     }
 
     void CreateRipplesTextures() {
 
-        //Create ripple textures
-        _ripplesTexture0 = new RenderTexture(textureSize.x, textureSize.y, 1, RenderTextureFormat.ARGBFloat);
+		if (_ripplesTexture0 != null)
+			_ripplesTexture0.Release();
+
+		if (_ripplesTexture1 != null)
+			_ripplesTexture1.Release();
+
+		//Create ripple textures
+		_ripplesTexture0 = new RenderTexture(textureSize.x, textureSize.y, 1, RenderTextureFormat.ARGBFloat);
         _ripplesTexture0.enableRandomWrite = true;
         _ripplesTexture0.Create();
 
@@ -135,10 +158,13 @@ public class RipplesComputeController : MonoBehaviour
 
     void InitRipples() {
 
-        ripplesCompute.SetTexture(_ripplesInitKernel, "_RipplesTextureRead", _readWriteFlag ? _ripplesTexture0 : _ripplesTexture1);
-        ripplesCompute.SetTexture(_ripplesInitKernel, "_RipplesTextureWrite", _readWriteFlag ? _ripplesTexture1 : _ripplesTexture0);
+        ripplesCompute.SetTexture(_ripplesInitKernel, "_RipplesTextureWrite", _ripplesTexture0);
 
-        ripplesCompute.Dispatch(_ripplesInitKernel, textureSize.x / _NUMTHREADSPERGROUP, textureSize.y / _NUMTHREADSPERGROUP, 1);
+        ripplesCompute.Dispatch(_ripplesInitKernel, _groupCountX, _groupCountY, 1);
+
+        ripplesCompute.SetTexture(_ripplesInitKernel, "_RipplesTextureWrite", _ripplesTexture1);
+
+        ripplesCompute.Dispatch(_ripplesInitKernel, _groupCountX, _groupCountY, 1);
     }
 
     void ComputeRipples() {
@@ -154,7 +180,7 @@ public class RipplesComputeController : MonoBehaviour
         ripplesCompute.SetTexture(_ripplesUpdateKernel, "_RipplesTextureRead", _readWriteFlag ? _ripplesTexture0 : _ripplesTexture1);
         ripplesCompute.SetTexture(_ripplesUpdateKernel, "_RipplesTextureWrite", _readWriteFlag ? _ripplesTexture1 : _ripplesTexture0);
 
-        ripplesCompute.Dispatch(_ripplesUpdateKernel, textureSize.x / _NUMTHREADSPERGROUP, textureSize.y / _NUMTHREADSPERGROUP, 1);
+        ripplesCompute.Dispatch(_ripplesUpdateKernel, _groupCountX, _groupCountY, 1);
     }
 
     void BindRipplesTextureToMaterial() {

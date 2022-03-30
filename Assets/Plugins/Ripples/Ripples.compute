@@ -9,15 +9,15 @@ float _RipplesAttenuation;
 float _TextureWidth;
 float _TextureHeight;
 
-float4 _Mouse;
-
 int _AugmentaPointsCount;
 StructuredBuffer<float4> _AugmentaPoints;
 
-RWTexture2D<float4> _RipplesTextureRead;
+Texture2D<float4> _RipplesTextureRead;
 RWTexture2D<float4> _RipplesTextureWrite;
 
-float4 SampleTexture2DBilinear(RWTexture2D<float4> textureToSample, float2 coord) {
+SamplerState linearClampSampler;
+
+float4 SampleTexture2DBilinear(Texture2D<float4> textureToSample, float2 coord) {
 
 	coord.x = min(max(coord.x, 0), _TextureWidth - 1);
 	coord.y = min(max(coord.y, 0), _TextureHeight - 1);
@@ -49,7 +49,6 @@ float4 SampleTexture2DBilinear(RWTexture2D<float4> textureToSample, float2 coord
 [numthreads(8, 8, 1)]
 void InitRipples(uint3 id : SV_DispatchThreadID)
 {
-	_RipplesTextureRead[id.xy] = float4(0.5f, 0.5f, 0, 0);
 	_RipplesTextureWrite[id.xy] = float4(0.5f, 0.5f, 0, 0);
 }
 
@@ -57,28 +56,35 @@ void InitRipples(uint3 id : SV_DispatchThreadID)
 void UpdateRipples (uint3 id : SV_DispatchThreadID)
 {
 	float2 textureSize = float2(_TextureWidth, _TextureHeight);
+
 	float3 eps = float3(1.0f, 1.0f, 0.0f);
 
-	float4 c = SampleTexture2DBilinear(_RipplesTextureRead, id.xy);
+	float2 uv = (id.xy + float2(0.5f, 0.5f)) / textureSize;
+	float3 duv = float3(1.0f / _TextureWidth, 1.0f / _TextureHeight, 0.0f);
+
+	//float4 c = SampleTexture2DBilinear(_RipplesTextureRead, id.xy);
+
+	//float p10 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy - eps.zy).x;
+	//float p01 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy - eps.xz).x;
+	//float p21 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy + eps.xz).x;
+	//float p12 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy + eps.zy).x;
+
+	float4 c = _RipplesTextureRead.SampleLevel(linearClampSampler, uv, 0);
+
+	float p10 = _RipplesTextureRead.SampleLevel(linearClampSampler, uv - duv.zy, 0).x;
+	float p01 = _RipplesTextureRead.SampleLevel(linearClampSampler, uv - duv.xz, 0).x;
+	float p21 = _RipplesTextureRead.SampleLevel(linearClampSampler, uv + duv.xz, 0).x;
+	float p12 = _RipplesTextureRead.SampleLevel(linearClampSampler, uv + duv.zy, 0).x;
 
 	float p11 = c.y;
-
-	float p10 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy - eps.zy).x;
-	float p01 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy - eps.xz).x;
-	float p21 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy + eps.xz).x;
-	float p12 = SampleTexture2DBilinear(_RipplesTextureRead, id.xy + eps.zy).x;
-
 	float d = 0.0f;
 
-	// add ripples
-	//if(_Mouse.w == 1)
-	//	d += smoothstep(4.5, .5, length(float2(_Mouse.x, _Mouse.y) * textureSize - id.xy));
-
+	//Add ripples
 	float minDistToPoint = 1000000000.0f;
 
 	for (int i = 0; i < _AugmentaPointsCount; i++) {
 		if (_AugmentaPoints[i].w == 1) {
-			float distToPoint = length(float2(_AugmentaPoints[i].x, _AugmentaPoints[i].y) * textureSize - id.xy) - _RipplesScale;
+			float distToPoint = length(_AugmentaPoints[i].xy * textureSize - id.xy) - _RipplesScale;
 
 			if (distToPoint < minDistToPoint)
 				minDistToPoint = distToPoint;

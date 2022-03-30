@@ -6,6 +6,8 @@ Add ripples from Augmenta objects onto a spout input.
 
 Press H to toggle the user interface.
 
+Draw a circle with the mouse to toggle the debug interface.
+
 ## Input
 
 The name of the spout input can be defined in the SpoutReceiver panel.

@@ -195,6 +195,51 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 79c2718dd59243e4c90e145349e7dadf, type: 3}
+--- !u!1 &165108254
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 165108256}
+  - component: {fileID: 165108255}
+  m_Layer: 0
+  m_Name: TargetFPS
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &165108255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165108254}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeef2e41139886a44a7f2d0606edf2d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetFPS: 60
+--- !u!4 &165108256
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165108254}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &289892701
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,7 +303,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &436496136
 GameObject:
@@ -296,9 +341,8 @@ MonoBehaviour:
     m_Bits: 512
   cam: {fileID: 967593085}
   ripplesCompute: {fileID: 7200000, guid: 201b8f67cc66a0844853afe3adff93cf, type: 3}
-  textureSize: {x: 2048, y: 2048}
+  textureSize: {x: 1024, y: 1024}
   ripplesMaterial: {fileID: 2100000, guid: 9b73c0ad51f1d164680a7347e0440931, type: 2}
-  updatePerSeconds: 120
   ripplesSize: {x: 1, y: 1}
   ripplesScale: 10
   ripplesAttenuation: 0.01
@@ -321,7 +365,7 @@ Transform:
   m_Children:
   - {fileID: 1447100390}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &436496139
 MonoBehaviour:
@@ -451,7 +495,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &780083374
 PrefabInstance:
@@ -914,6 +958,81 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1442870533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1442870536}
+  - component: {fileID: 1442870535}
+  - component: {fileID: 1442870534}
+  m_Layer: 0
+  m_Name: VideoOutputSizeBinder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1442870534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1442870533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ad508a2645a78b4e8562e969cc13924, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TargetScript: {fileID: 1442870535}
+  BarColor: {r: 1, g: 0.18942153, b: 0, a: 1}
+  id: RipplesTextureSize
+  folder: 
+  debug: 0
+  targetDirectory: 
+  sourceScene: 
+  usePanel: 1
+  usePresets: 1
+  hasPresets: 0
+  closePanelAtStart: 1
+  currentPreset: 
+  presetList: []
+  ripplesTextureSizeMultiplier: 0
+--- !u!114 &1442870535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1442870533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b8fa8835c1e3c54181f6650c6b9fe5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  augmentaVideoOutput: {fileID: 967593077}
+  ripplesQuadTransform: {fileID: 1447100390}
+  ripplesController: {fileID: 436496137}
+  ripplesTextureSizeMultiplier: 0.5
+--- !u!4 &1442870536
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1442870533}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1447100389
 GameObject:
   m_ObjectHideFlags: 0
@@ -926,7 +1045,6 @@ GameObject:
   - component: {fileID: 1447100392}
   - component: {fileID: 1447100391}
   - component: {fileID: 1447100393}
-  - component: {fileID: 1447100394}
   m_Layer: 9
   m_Name: RipplesFloor
   m_TagString: Untagged
@@ -1013,19 +1131,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &1447100394
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1447100389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b8fa8835c1e3c54181f6650c6b9fe5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  augmentaVideoOutput: {fileID: 967593077}
 --- !u!1001 &1491631270
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1151,7 +1256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62f7dec0b00674947bc631624c21970a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sourceName: 
+  _sourceName: Augmenta Fusion - Scene
   _targetTexture: {fileID: 0}
   _targetRenderer: {fileID: 0}
   _targetMaterialProperty: 
@@ -1169,7 +1274,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1573954155
 MonoBehaviour:
